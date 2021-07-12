@@ -1,42 +1,24 @@
 "use strict";
+import {IArgumentParser} from "./IArgumentParser";
+import {BooleanParser} from "./BooleanParser";
+import {IArgument} from "./IArgument";
+import {ICommandOptions} from "./ICommandOptions";
+
 /**
  * This 80-spaces are used as a fast means for padding strings.
  * @type {string}
  */
 const SPACES = "                                                                                ";
-const moment = require("moment");
-
-type TRequired = boolean | ((params?: Map<string, any>) => boolean);
-
-interface IParamParser<T> {
-    parse(value: string): T | null | undefined;
-    name: string;
-}
-
-interface IParam<T> {
-    name: string,
-    parser?: (new () => IParamParser<T>),
-    required?: TRequired,
-    flag?: boolean,
-    array?: boolean,
-    shortCode?: string,
-    position?: number,
-    defaultValue?: T | null,
-    pattern?: RegExp,
-    description?: string,
-
-    // parse(input: string): T
-}
 
 /**
  * Model for a command line. The ability for adding parameters, default values, required or not required, parameter
  * types and flags. Also has a help feature.
  */
-class CommandParam<T> implements IParam<T> {
+class CommandArgument<T> implements IArgument<T> {
     private $array: boolean = false;
     private $name: string;
     private $flag: boolean = false;
-    private $parser?: new() => IParamParser<T>;
+    private $parser?: new() => IArgumentParser<T>;
     private $required: boolean | ((params?: Map<string, any>) => boolean) = true;
     private $defaultValue: T | null;
     private $shortCode?: string;
@@ -74,7 +56,7 @@ class CommandParam<T> implements IParam<T> {
                     array = false,
                     defaultValue = null,
                     pattern
-                }: IParam<T>
+                }: IArgument<T>
     ) {
 
         // Name is required
@@ -103,7 +85,7 @@ class CommandParam<T> implements IParam<T> {
         this.$parser = parser;
         this.$required = flag ? false : (required === false ? false : required);
         this.$shortCode = shortCode;
-        this.$position = position;
+        this.$position = position as number;
         this.$description = description;
         this.$defaultValue = defaultValue;
         this.$pattern = pattern && new RegExp(pattern);
@@ -152,15 +134,15 @@ class CommandParam<T> implements IParam<T> {
         return this.$required;
     }
 
-    get parser()  {
+    get parser() {
         return this.$parser;
     }
 
-    getParser(): IParamParser<T> | undefined {
+    getParser(): IArgumentParser<T> | undefined {
         return this.$parser && new this.$parser();
     }
 
-    get type() : string {
+    get type(): string {
         return this.$parser && new this.$parser()?.name || "string";
     }
 
@@ -205,7 +187,7 @@ class CommandParam<T> implements IParam<T> {
     /**
      * Converts non-primitive built-in types to their primitive variant. This is for compatibility, and  due to
      * several utilities doing type checking on primitive values only.
-     * @param value {string|T} Any type.
+     * @param value {string} Any type.
      * @return {string|boolean|number|object|undefined} Not non-primitive String, Boolean or Number.
      */
     autoConvert(value: string): undefined | T | null {
@@ -214,71 +196,6 @@ class CommandParam<T> implements IParam<T> {
         }
         return value as unknown as T;
     }
-}
-
-export class DateParser implements IParamParser<Date> {
-    public readonly name = "Date";
-
-    public parse(arg: string): Date | null | undefined {
-        arg = arg.trim();
-        switch (arg) {
-            case "":
-                return undefined;
-            case "null":
-                return null;
-            case "today":
-                return moment().startOf("day").toDate();
-            case "tomorrow" :
-                return moment().add(1, "day").startOf("day").toDate();
-            case "yesterday" :
-                return moment().subtract(1, "day").startOf("day").toDate();
-        }
-        const r = moment(arg);
-
-        if (!r.isValid()) {
-            throw new Error("Not an ISO date");
-        }
-
-        return r.toDate();
-    }
-}
-
-export class ObjectParser implements IParamParser<Object> {
-    public readonly name = "Object";
-
-    parse(value: string): Object | null | undefined {
-        switch (value.trim()) {
-            case "":
-                return undefined;
-            case "null":
-                return null;
-            default:
-                return JSON.parse(value);
-        }
-    }
-}
-
-export class BooleanParser implements IParamParser<Boolean> {
-    public parse(arg: string): Boolean | null | undefined {
-        switch (arg.trim().toLowerCase()) {
-            case "null":
-                return null;
-            case "":
-                return undefined;
-            case "0":
-            case "false":
-            case "no":
-                return false;
-            case "true":
-            case "1":
-            case"yes":
-                return true;
-            default:
-                throw new Error("Invalid boolean");
-        }
-    }
-
-    public readonly name = "Boolean";
 }
 
 /**
@@ -299,10 +216,8 @@ export class BooleanParser implements IParamParser<Boolean> {
  * strict/non-strict mode (ignores unknown arguments)
  */
 export class Command<R> {
-    private $params: Map<string, CommandParam<any>> = new Map<string, CommandParam<any>>();
+    private $params: Map<string, CommandArgument<any>> = new Map<string, CommandArgument<any>>();
     private $positionals: number = 0;
-    private $strict = true;
-    private $interruptible: boolean | number = false;
     private $lastPositional?: string;
     private $info?: string;
     $execute?: (args: Map<string, any>) => Promise<R>;
@@ -310,11 +225,11 @@ export class Command<R> {
     /**
      * Constructs a new command.
      *
-     * @param name {string} The name of the command
-     * @param strict? {boolean} Strict mode, defaults to true. Strict mode will throw on unknown parameters.
+     * @param name The name of the command
+     * @param options? Options, like strict and console.
      */
-    constructor(public readonly name: string, public readonly strict = true) {
-        this.param<Boolean>({
+    constructor(public readonly name: string, readonly options: ICommandOptions = {strict: true, logger: console}) {
+        this.addArgument<Boolean>({
             name: "help",
             shortCode: "?",
             flag: true,
@@ -322,22 +237,6 @@ export class Command<R> {
         });
     }
 
-    get isInterruptible() {
-        return this.$interruptible;
-    }
-
-    /**
-     * Marks this command as interruptible
-     * @param value? {boolean|number} Boolean or undefined value. Defaults to true.
-     * @return {Command} This instance
-     */
-    interruptible(value: boolean | number = true) {
-        if (value === true || value === undefined) {
-            value = 30000;
-        }
-        this.$interruptible = value;
-        return this;
-    }
 
     /**
      * Add a parameter to this command
@@ -347,7 +246,7 @@ export class Command<R> {
      * @param required? {Boolean|function(object)} False if not required, or a function that evaluates to a boolean
      * @param shortCode? {String} 1-character string, to be used as shortcode
      * @param flag? {Boolean} Flag field if try (no value, boolean type)
-     * @param positional? {boolean} True if positional, position is calculated by order of adding parameters
+     * @param position? {boolean} True if positional, position is calculated by order of adding parameters
      * @param description {string} Description for help
      * @param array {boolean} True when the param of array type (multi-value, comma-separated)
      * @param defaultValue {any} Default value in the target type
@@ -355,18 +254,18 @@ export class Command<R> {
      *
      * @return {Command} This command instance.
      */
-    param<T>({
-                 name,
-                 parser,
-                 required = true,
-                 shortCode,
-                 flag = false,
-                 position,
-                 description,
-                 array = false,
-                 defaultValue = null,
-                 pattern
-             }: IParam<T>) {
+    addArgument<T>({
+                       name,
+                       parser,
+                       required = true,
+                       shortCode,
+                       flag = false,
+                       position,
+                       description,
+                       array = false,
+                       defaultValue = null,
+                       pattern
+                   }: IArgument<T>) {
 
         if (!name) {
             throw new Error("Invalid param name");
@@ -380,8 +279,8 @@ export class Command<R> {
             throw new Error(`Duplicated short code ${shortCode}`);
         }
 
-        if (position && !this.$strict) {
-            console.warn("Positional arguments are ignored in a non-strict command");
+        if (position && this.options?.strict === false) {
+            this.options?.logger?.warn("Positional arguments are ignored in a non-strict command");
             return this;
         }
 
@@ -392,9 +291,9 @@ export class Command<R> {
                 "'. No new required positional argument are possible."
             );
         }
-        const param = new CommandParam<T>({
+        const param = new CommandArgument<T>({
             name,
-            parser: flag ? (BooleanParser as unknown as new () => IParamParser<T>) : parser,
+            parser: flag ? (BooleanParser as unknown as new () => IArgumentParser<T>) : parser,
             required: flag ? false : required,
             flag: flag === true,
             shortCode,
@@ -422,7 +321,7 @@ export class Command<R> {
      */
     toString() {
         let help = this.name;
-        let params = Array.from(this.parameters).map((param: CommandParam<any>) => {
+        let params = Array.from(this.parameters).map((param: CommandArgument<any>) => {
             let p = [];
             let s;
             if (!param.position) {
@@ -467,11 +366,11 @@ export class Command<R> {
      * @param name {string} The name of the parameter to retrieve
      * @param verify? {boolean} Throw if not found
      * @param ignoreStrict {boolean} ignore strict mode
-     * @return {CommandParam} Command parameter or undefined
+     * @return {CommandArgument} Command parameter or undefined
      */
-    getParameterByName<T>(name: string, verify = false, ignoreStrict = false): CommandParam<T> {
-        const param = this.$params.get(name) as CommandParam<T>;
-        if (!param && verify && this.$strict && !ignoreStrict) {
+    getParameterByName<T>(name: string, verify = false, ignoreStrict = false): CommandArgument<T> {
+        const param = this.$params.get(name) as CommandArgument<T>;
+        if (!param && verify && this.options?.strict && !ignoreStrict) {
             throw new Error(`Unknown named parameter '${name}'`);
         }
         return param;
@@ -483,14 +382,14 @@ export class Command<R> {
      * @param shortCode {string} Single-char shortcode of the parameter to retrieve
      * @param verify? {boolean} Throw if not found
      * @param ignoreStrict {boolean} ignore strict mode
-     * @return {CommandParam} Command parameter or undefined
+     * @return {CommandArgument} Command parameter or undefined
      */
-    getParameterByShortCode<T>(shortCode: string, verify = false, ignoreStrict = false): CommandParam<T> {
+    getParameterByShortCode<T>(shortCode: string, verify = false, ignoreStrict = false): CommandArgument<T> {
         const param =
             Array
                 .from(this.parameters)
-                .find(param => param.shortCode === shortCode) as CommandParam<T>;
-        if (!param && verify && this.$strict && !ignoreStrict) {
+                .find(param => param.shortCode === shortCode) as CommandArgument<T>;
+        if (!param && verify && this.options?.strict && !ignoreStrict) {
             throw new Error(`Unknown short code '${shortCode}'`);
         }
         return param;
@@ -502,13 +401,13 @@ export class Command<R> {
      * @param position {number} The parameter position
      * @param verify? {boolean} Throw if not found
      * @param ignoreStrict {boolean} ignore strict mode
-     * @return {CommandParam} Command parameter or undefined
+     * @return {CommandArgument} Command parameter or undefined
      */
     getParameterByPosition(position: number, verify = false, ignoreStrict = false) {
         const param = Array
             .from(this.parameters)
             .find((param) => param.position === position);
-        if (!param && verify && this.$strict && !ignoreStrict) {
+        if (!param && verify && this.options?.strict && !ignoreStrict) {
             throw Object.assign(
                 new Error(`Unknown positional parameter ${position}`),
                 {position: position}
@@ -543,20 +442,16 @@ export class Command<R> {
             return this.parse(ignoreStrict, ...args);
         } catch (error) {
             if (noThrow) {
-                console.error(error.message);
+                this.options?.logger?.error(error.message);
                 return new CommandInstance<R>(this, new Map<string, any>().set("help", true), args);
             }
             throw error;
         }
     }
 
-    get parameterNames() {
-        return this.$params.keys();
-    }
-
     /**
-     *
-     * @return {CommandParam[]}
+     * Return an array of IArgument
+     * @return {IArgument[]}
      */
     get parameters() {
         return this.$params.values();
@@ -572,7 +467,7 @@ export class Command<R> {
             });
 
         let nextPosition = 0;
-        let nextParam: CommandParam<any> | null;
+        let nextParam: CommandArgument<any> | null;
         args.forEach((argument) => {
             if (argument.startsWith("--")) {
                 // Named, full style
@@ -639,7 +534,7 @@ export class Command<R> {
      * @param strings
      * @return {number}
      */
-    static getMaxStringLength(strings: string[]) {
+    private static getMaxStringLength(strings: string[]) {
         return strings.reduce((last, next) => {
             return Math.max(last, next.length);
         }, 0);
@@ -651,7 +546,7 @@ export class Command<R> {
      * @param length {number} The result length after padding
      * @return {string} The padded string
      */
-    static rightPad(s: string, length: number) {
+    private static rightPad(s: string, length: number) {
         return s + SPACES.substr(0, length - s.length);
     }
 
@@ -666,18 +561,20 @@ export class Command<R> {
         return this;
     }
 
+    /**
+     * Sets the callback function that is to be executed upon calling {@see Command.execute()}. This is not required, but when set, you
+     * don't need to provide the callback to the execute method.
+     *
+     * @param callbackFunction The callback that is to be executed, will be executed on a {@see CommandInstance} instance,
+     * which will be available via the this object. The argumens map will be provided as the first argument.
+     */
     onExecute(callbackFunction: (args: Map<string, any>) => Promise<R>): this {
         this.$execute = callbackFunction;
         return this;
     }
-
-    public static INTERRUPTIBLE = {NO: false, YES: true};
 }
 
 class CommandInstance<R> {
-    private $interrupted: any = null;
-
-    // private $rawArgs?: string[];
 
     constructor(
         public readonly command: Command<R>,
@@ -693,61 +590,32 @@ class CommandInstance<R> {
         return this.command.name;
     }
 
-    interrupt() {
-        if (!this.command.isInterruptible) {
-            return console.error("This process is not interruptible!");
+    get<T>(argName: string, defaultValue?: T | null): T | null | undefined {
+        if (this.args.has(argName)) {
+            return this.args.get(argName) as T;
         }
-        console.warn("Process interrupted!");
-        return new Promise((resolve, reject) => {
-            let timeoutHandle = setTimeout(() => {
-                console.warn("No timely response on interruptible!");
-                this.$interrupted.reject(new Error("Interruptible timeout!"));
-            }, this.command.isInterruptible as number);
-            this.$interrupted = {
-                resolve: (result: R) => {
-                    clearTimeout(timeoutHandle);
-                    // timeoutHandle = null;
-                    resolve(result);
-                }, reject: (error: Error) => {
-                    clearTimeout(timeoutHandle);
-                    // timeoutHandle = null;
-                    reject(error);
-                    setTimeout(() => process.exit(1), 5);
-                }
-            };
-        })
-            .then(() => {
-                console.info("Process interrupted successfully");
-            })
-            .catch((error: Error) => {
-                console.error(error, error.stack);
-                console.warn("Process could not be interrupted properly.");
-            });
-    }
-
-    get interrupted() {
-        return this.$interrupted;
+        if (defaultValue !== undefined) {
+            return defaultValue;
+        }
+        return undefined;
     }
 
     /**
      * Returns a promise for the execution of the command.
      *
-     * @param callbackFunction {function(object?)} Command to execute. The args can be read from this, or from the first
-     * object argument.
+     * @param callbackFunction The callback that is to be executed, optional if already set via {@see Command.onExecute}.
+     * The arguments map will be provided as the first argument.
      * @return {Promise<R>} Promise for anything.
      */
-    async execute(callbackFunction: (args: Map<string, any>) => Promise<R>) {
+    async execute(callbackFunction?: (args: Map<string, any>) => Promise<R>) {
         let callback = callbackFunction || this.command.$execute;
-        if (this.command.isInterruptible) {
-            process.on("SIGINT", () => this.interrupt());
-        }
 
         // Load the server unless not needed
         if (!callback) {
             throw new Error("No execution callback!");
         }
         if (this.args.get("help")) {
-            console.info(() => [this.command.toString()]);
+            this.command.options?.logger?.info(() => [this.command.toString()]);
             return;
         }
         try {
@@ -758,7 +626,7 @@ class CommandInstance<R> {
                 return result;
             }
         } catch (error) {
-            console.error(error.message || error);
+            this.command?.options?.logger?.error(error.message || error);
             throw error;
         }
     }

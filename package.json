@@ -1,13 +1,14 @@
 {
-  "name": "luxafor-cli",
+  "name": "node-commandline-advanced",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Advanced NodeJS Command Line Interpreter",
+  "main": "lib/main/models/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "npx mocha -r ts-node/register src/test/**/*.spec.?s",
+    "prepack": "npx tsc --build --clean && npx tsc --build"
   },
-  "author": "Daan Kets <daankets@deltasource.eu>",
-  "license": "UNLICENSED",
+  "author": "Daan Kets <daankets@blackbit.be>",
+  "license": "MIT",
   "devDependencies": {
     "@types/chai": "^4.2.21",
     "@types/mocha": "^8.2.3",
@@ -15,9 +16,10 @@
     "chai": "^4.3.4",
     "mocha": "^9.0.2",
     "ts-node": "^10.1.0",
-    "typescript": "^4.3.5"
-  },
-  "dependencies": {
+    "typescript": "^4.3.5",
     "moment": "^2.29.1"
+  },
+  "optionalDependencies": {
+    "moment": "2.x"
   }
 }
