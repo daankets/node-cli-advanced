@@ -1,4 +1,4 @@
-import {IArgumentParser} from "./IArgumentParser";
+import {IArgumentParser} from "../models/IArgumentParser";
 import * as Path from "path";
 import {ParsedPath} from "path";
 

@@ -1,6 +1,6 @@
 import "mocha";
 import {assert} from "chai";
-import {IntParser} from "../main/models";
+import {IntParser} from "../main/parsers";
 
 describe("IntParser", () => {
     context("Parses strings into integral Number values", () => {

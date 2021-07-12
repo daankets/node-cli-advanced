@@ -1,8 +1,6 @@
 import "mocha";
 import {assert} from "chai";
-import {Command, IntParser} from "../main/models";
-import {BooleanParser, MomentParser, NumberParser} from "../main/models";
-import {DateParser} from "../main/models";
+import {Command, parsers} from "../main";
 
 describe("A Command", () => {
     context("Required arguments", () => {
@@ -14,7 +12,7 @@ describe("A Command", () => {
                 description: "Always required"
             });
             try {
-                const instance = testCommand.parse();
+                testCommand.parse();
                 assert.fail("Must not succeed");
             } catch (error) {
                 assert.equal(error.message, "Missing required fields: test")
@@ -51,9 +49,9 @@ describe("A Command", () => {
     context("Argument types", () => {
         it("Accepts Boolean arguments", () => {
             const command = new Command("test")
-                .addArgument<Boolean>({
+                .addArgument({
                     name: "test",
-                    parser: BooleanParser
+                    parser: parsers.BooleanParser
                 });
             const instance = command.parse(false, "--test", "false");
             assert.equal(instance.args.get("test"), false);
@@ -62,34 +60,34 @@ describe("A Command", () => {
             const command = new Command("test")
                 .addArgument<Date>({
                     name: "test",
-                    parser: DateParser
+                    parser: parsers.DateParser
                 });
             const instance = command.parse(false, "--test", "2021-01-01");
             assert.instanceOf(instance.args.get("test"), Date);
         });
         it("Accepts integral Number arguments", () => {
             const command = new Command("test")
-                .addArgument<Number>({
+                .addArgument({
                     name: "test",
-                    parser: NumberParser
+                    parser: parsers.NumberParser
                 });
             const instance = command.parse(false, "--test", "12345");
             assert.equal(instance.args.get("test"), 12345);
         });
         it("Accepts decimal Number arguments", () => {
             const command = new Command("test")
-                .addArgument<Number>({
+                .addArgument({
                     name: "test",
-                    parser: NumberParser
+                    parser: parsers.NumberParser
                 });
             const instance = command.parse(false, "--test", "123.45");
             assert.equal(instance.args.get("test"), 123.45);
         });
         it("Can be restricted to Int arguments", () => {
             const command = new Command("test")
-                .addArgument<Number>({
+                .addArgument({
                     name: "test",
-                    parser: IntParser
+                    parser: parsers.IntParser
                 });
             try {
                 command.parse(false, "--test", "123.45");
@@ -102,14 +100,14 @@ describe("A Command", () => {
     context("Arrays", () => {
         it("Can parse comma-separated arguments as arrays", () => {
             const command = new Command("test")
-                .addArgument<Number>({
+                .addArgument({
                     name: "test1",
-                    parser: NumberParser,
+                    parser: parsers.NumberParser,
                     array: true
                 })
-                .addArgument<Boolean>({
+                .addArgument({
                     name: "test2",
-                    parser: BooleanParser,
+                    parser: parsers.BooleanParser,
                     array: true
                 });
             const instance = command.parse(

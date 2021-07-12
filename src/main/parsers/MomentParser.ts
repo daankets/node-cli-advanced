@@ -1,4 +1,4 @@
-import {IArgumentParser} from "./IArgumentParser";
+import {IArgumentParser} from "../models/IArgumentParser";
 import moment, {Moment} from "moment";
 
 export class MomentParser implements IArgumentParser<Moment> {

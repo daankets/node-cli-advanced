@@ -1,4 +1,4 @@
-import {IArgumentParser} from "./IArgumentParser";
+import {IArgumentParser} from "../models/IArgumentParser";
 
 export class DateParser implements IArgumentParser<Date> {
     public readonly name = "Date";

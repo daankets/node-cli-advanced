@@ -1,7 +1,7 @@
-import {IArgumentParser} from "./IArgumentParser";
+import {IArgumentParser} from "../models";
 
-export class BooleanParser implements IArgumentParser<Boolean> {
-    public parse(arg: string): Boolean | null | undefined {
+export class BooleanParser implements IArgumentParser<boolean> {
+    public parse(arg: string): boolean | null | undefined {
         switch (arg.trim().toLowerCase()) {
             case "null":
                 return null;

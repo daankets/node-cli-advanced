@@ -1,13 +1,13 @@
-import {IArgumentParser} from "./IArgumentParser";
+import {IArgumentParser} from "../models";
 
-export class NumberParser implements IArgumentParser<Number> {
-    public readonly name = "Number";
+export class NumberParser implements IArgumentParser<number> {
+    public readonly name = "number";
 
     constructor(private readonly mode: "int" | "float" = "float") {
 
     }
 
-    parse(value: string): Number | null | undefined {
+    parse(value: string): number | null | undefined {
         switch (value.trim().toLowerCase()) {
             case "":
                 return undefined;

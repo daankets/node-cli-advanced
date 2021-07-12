@@ -10,10 +10,22 @@ command line interfaces in a declarative way.
 - Declare a new CLI Command by creating a Command instance
 - Declare arguments by adding them to the command instance
 - Add parsers for built-in and custom argument types
+    - String
+        - Pattern (RegExp based)
+        - RegExp (an expression)
+        - Path (ParsedPath)
+    - Boolean
+    - Number
+        - Integer (Number)
+    - Date
+    - Moment
+    - Enum
+        - String
+        - Numerical
+    - ... whatever you implement a parser for
 - Declare single vs array arguments
 - Performs validation if required
 - Conditionally required arguments (based on value or absence of other arguments for example)
-- Pattern matching for string arguments
 - Named arguments (`--say Hello`)
 - Argument shortcodes (`-s Hello`)
 - Positional arguments (`cp <source> <target>`)
@@ -78,6 +90,19 @@ const demoCommand = new Command("demo", true)
         required: false
     })
 ```
+### All options for `addArgument(...)`
+> See the **IArgument** Type as a reference
+#### name: string
+The name of the argument. This name will be used in order to add the argument value into the argument Map.
+
+Must be unique.
+### parser: IArgumentParser<T>
+The parser defines the type, and can be either:
+
+- A class (constructor) implementing `IArgumentParser<T>`
+- An intance of `IArgumentParser<T>`
+
+A parser instance provides both the parse function and the name property. The name is intended to provide the type for documentation and help output.
 
 ## Parsing a command line
 
@@ -116,8 +141,8 @@ the output will be sent to the console.
 
 ## Override logging
 
-You can prevent or redirect logging by providing an alternative logger. Setting the logger to null will prevent logging.
-The logger expexts the IConsole interface
+You can prevent or redirect logging by providing an alternative logger. Setting the logger to null will prevent logging. The logger expexts the IConsole
+interface
 
 ```typescript
 const command = new Command("demo", {logger: console});
@@ -125,7 +150,20 @@ const command = new Command("demo", {logger: console});
 
 ## Parsers
 
-A parser allows conversion of a string argument into a typed value. The following parsers are supported out of the box:
+A parser allows conversion of a string argument into a typed value. They can either be passed to the argument as a class (newable) or as an instance (required
+if the parser needs extra information, like the EnumParser or the PatternParser).
+
+````typescript
+// The enum parsers must be either instantiated with an Enum
+parser: new EnumParser(Demo1Enum)
+// or extended as a custom parser
+parser: Demo1EnumParser
+// Same for PatternParser
+const ipAddressPattern = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$/
+parser: new PatternParser(ipAddressPattern)
+````
+
+The following parsers are supported out of the box
 
 |parser|type|remark|
 |---|---|---|
@@ -138,6 +176,7 @@ A parser allows conversion of a string argument into a typed value. The followin
 | ObjectParser | Object | Parses JSON into an object
 | PathParser | ParsedPath | Does not check for target existence |
 | RegExpParser | RegExp | Parses patterns AND flags if provided |
+| EnumParser | enum type | Parses enum keys to their respective values |
 
 ## License and Copyright
 

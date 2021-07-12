@@ -1,6 +1,6 @@
 import "mocha";
 import {assert} from "chai";
-import {BooleanParser} from "../main/models";
+import {BooleanParser} from "../main/parsers";
 
 describe("BooleanParser", () => {
     context("Parses strings into Boolean values", () => {
