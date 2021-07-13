@@ -1,9 +1,14 @@
-# Advanced NodeJS Command Line Interpreter
+# _Advanced*_ NodeJS Command Line Interpreter
 
 ## Motivation
 
-This is a backport from some of my own projects, that I decided to make available as a utility. This typescript based library (ES2015) allows for setting
-command line interfaces in a declarative way.
+This is a TypeScript port and improvement from one of my earlier projects, that I decided to make available as a utility, after using it in various other projects.
+This typescript based library (ES2015) allows for setting up command line interfaces in a declarative way. It hope it will save you a lot of time.
+
+> **Disclaimer**
+>
+> i've called this package _advanced_ as it is an advancement of the previous version, and has
+> quite a few of new features. But it's up to you to make up your own mind :-)
 
 ## Features
 
@@ -31,9 +36,10 @@ command line interfaces in a declarative way.
 - Positional arguments (`cp <source> <target>`)
 - Boolean flag arguments (-R) without value (`cp -R <source> <target>`)
 - Set a callback for execution of the command, or provide a diffent callback every time
-- Parse a string
-- Parse a string array
-- Parse process argv
+- Parsing command lines
+	- Parse a string
+	- Parse a string array ()
+	- Parse process argv
 - Execute after parsing
 - Provide help text and usage
 - Use a custom logger
@@ -163,7 +169,7 @@ const ipAddressPattern = /^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){
 parser: new PatternParser(ipAddressPattern)
 ````
 
-The following parsers are supported out of the box
+The following argument parsers are supported out of the box
 
 |parser|type|remark|
 |---|---|---|
@@ -180,12 +186,13 @@ The following parsers are supported out of the box
 
 ## License and Copyright
 
-* Copyright ©2021 Daan Kets
-* This software is distributed under the included MIT license.<br>
-  _See included [LICENSE](./LICENSE) file_
+Copyright ©2021 Daan Kets
+
+This software is distributed under the included MIT license.<br>
+_See the included [LICENSE](./LICENSE) file_
 
 ## Depencencies
 
-### [moment.js](https://momentjs.com/) - MIT license
+* [moment.js](https://momentjs.com/) - MIT license
 
-This project can optionally use (but does not depend upon or distribute) the momentjs library.
+  This project can optionally use (but does not depend upon or distribute) the momentjs library.
