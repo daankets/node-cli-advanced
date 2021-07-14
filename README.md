@@ -1,5 +1,5 @@
 [![Node.js CI](https://github.com/daankets/node-cli-advanced/actions/workflows/build.yml/badge.svg)](https://github.com/daankets/node-cli-advanced/actions/workflows/build.yml)
-
+[![CodeQL](https://github.com/daankets/node-cli-advanced/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/daankets/node-cli-advanced/actions/workflows/codeql-analysis.yml)
 # _Advanced\*_ NodeJS Command Line Interpreter
 
 * See the [Release History](./HISTORY.md)
