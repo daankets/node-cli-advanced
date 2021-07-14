@@ -1,4 +1,8 @@
+[![Node.js CI](https://github.com/daankets/node-cli-advanced/actions/workflows/build.yml/badge.svg)](https://github.com/daankets/node-cli-advanced/actions/workflows/build.yml)
+
 # _Advanced\*_ NodeJS Command Line Interpreter
+
+* See the [Release History](./HISTORY.md)
 
 ## Motivation
 
