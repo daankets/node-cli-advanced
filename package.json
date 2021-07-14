@@ -1,37 +1,41 @@
 {
-  "name": "node-commandline-advanced",
-  "version": "1.0.0",
-  "description": "Advanced NodeJS Command Line Interpreter",
-  "main": "lib/main/models/index.js",
-  "scripts": {
-    "test": "npx eslint src && npx mocha -r ts-node/register src/test/**/*.spec.?s",
-    "build": "npm run test && npx tsc --build",
-    "clean": "npx tsc --build --clean",
-    "prepack": "npm run clean && npm run build"
-  },
-  "files": [
-    "lib/main",
-    "package-lock.json",
-    "package.json",
-    "LICENSE",
-    "README.md"
-  ],
-  "author": "Daan Kets <daankets@blackbit.be>",
-  "license": "MIT",
-  "devDependencies": {
-    "@types/chai": "^4.2.21",
-    "@types/mocha": "^8.2.3",
-    "@types/node": "^16.3.0",
-    "@typescript-eslint/eslint-plugin": "^4.28.3",
-    "@typescript-eslint/parser": "^4.28.3",
-    "chai": "^4.3.4",
-    "eslint": "^7.30.0",
-    "mocha": "^9.0.2",
-    "moment": "^2.29.1",
-    "ts-node": "^10.1.0",
-    "typescript": "^4.3.5"
-  },
-  "optionalDependencies": {
-    "moment": "2.x"
-  }
+	"name": "node-cli-advanced",
+	"version": "1.0.0",
+	"description": "Advanced NodeJS Command Line Interpreter",
+	"main": "lib/main/models/index.js",
+	"scripts": {
+		"test": "npx eslint src && npx mocha -r ts-node/register src/test/**/*.spec.?s",
+		"build": "npm run test && npx tsc --build",
+		"clean": "npx tsc --build --clean",
+		"prepack": "npm run clean && npm run build"
+	},
+	"files": [
+		"lib/main",
+		"package-lock.json",
+		"package.json",
+		"LICENSE",
+		"README.md"
+	],
+	"repository": {
+		"type": "git",
+		"url": "git@github.com:daankets/node-cli-advanced.git"
+	},
+	"author": "Daan Kets <daankets@blackbit.be>",
+	"license": "MIT",
+	"devDependencies": {
+		"@types/chai": "^4.2.21",
+		"@types/mocha": "^8.2.3",
+		"@types/node": "^16.3.0",
+		"@typescript-eslint/eslint-plugin": "^4.28.3",
+		"@typescript-eslint/parser": "^4.28.3",
+		"chai": "^4.3.4",
+		"eslint": "^7.30.0",
+		"mocha": "^9.0.2",
+		"moment": "^2.29.1",
+		"ts-node": "^10.1.0",
+		"typescript": "^4.3.5"
+	},
+	"optionalDependencies": {
+		"moment": "2.x"
+	}
 }

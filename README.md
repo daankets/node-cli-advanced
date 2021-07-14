@@ -1,13 +1,13 @@
-# _Advanced*_ NodeJS Command Line Interpreter
+# _Advanced\*_ NodeJS Command Line Interpreter
 
 ## Motivation
 
-This is a TypeScript port and improvement from one of my earlier projects, that I decided to make available as a utility, after using it in various other projects.
-This typescript based library (ES2015) allows for setting up command line interfaces in a declarative way. It hope it will save you a lot of time.
+This is a TypeScript port and improvement from one of my earlier projects, that I decided to make available as a utility, after using it in various other
+projects. This typescript based library (ES2015) allows for setting up command line interfaces in a declarative way. It hope it will save you a lot of time.
 
 > **Disclaimer**
 >
-> i've called this package _advanced_ as it is an advancement of the previous version, and has
+> i've called this package _\*advanced_ as it is an advancement of the previous version, and has
 > quite a few of new features. But it's up to you to make up your own mind :-)
 
 ## Features
@@ -15,19 +15,19 @@ This typescript based library (ES2015) allows for setting up command line interf
 - Declare a new CLI Command by creating a Command instance
 - Declare arguments by adding them to the command instance
 - Add parsers for built-in and custom argument types
-    - String
-        - Pattern (RegExp based)
-        - RegExp (an expression)
-        - Path (ParsedPath)
-    - Boolean
-    - Number
-        - Integer (Number)
-    - Date
-    - Moment
-    - Enum
-        - String
-        - Numerical
-    - ... whatever you implement a parser for
+	- String
+		- Pattern (RegExp based)
+		- RegExp (an expression)
+		- Path (ParsedPath)
+	- Boolean
+	- Number
+		- Integer (Number)
+	- Date
+	- Moment
+	- Enum
+		- String
+		- Numerical
+	- ... whatever you implement a parser for
 - Declare single vs array arguments
 - Performs validation if required
 - Conditionally required arguments (based on value or absence of other arguments for example)
@@ -66,49 +66,64 @@ npm install --save moment
 ```typescript
 // A demo command with strict parsing disabled and a description.
 const demoCommand = new Command("demo", {strict: false})
-    .info("A demo command");
+	.info("A demo command");
 ```
 
 ### Declaring arguments
 
 ```typescript
 const demoCommand = new Command("demo", true)
-    .info("A demo command")
-    // A flag argument
-    .addArgument({
-        name: "fast",
-        shortCode: "f",
-        description: "Execute fast!",
-        // required: false // ALWAYS FALSE FOR FLAGS,
-        parser: BooleanParser,
-        // array: false // ALWAYS FALSE FOR FLAGS
-    })
-    .addArgument({
-        name: "in",
-        shortCode: "i",
-        description: "Input file",
-        // required: true // REQUIRED BY DEFAULT
-        // parser: null // Default parser parses strings,
-        array: true // Allow for multiple input files!
-    })
-    .addArgument({
-        name: "optional",
-        required: false
-    })
+	.info("A demo command")
+	// A flag argument
+	.addArgument({
+		name: "fast",
+		shortCode: "f",
+		description: "Execute fast!",
+		// required: false // ALWAYS FALSE FOR FLAGS,
+		parser: BooleanParser,
+		// array: false // ALWAYS FALSE FOR FLAGS
+	})
+	.addArgument({
+		name: "in",
+		shortCode: "i",
+		description: "Input file",
+		// required: true // REQUIRED BY DEFAULT
+		// parser: null // Default parser parses strings,
+		array: true // Allow for multiple input files!
+	})
+	.addArgument({
+		name: "optional",
+		required: false
+	})
 ```
+
 ### All options for `addArgument(...)`
+
 > See the **IArgument** Type as a reference
+
 #### name: string
+
 The name of the argument. This name will be used in order to add the argument value into the argument Map.
 
 Must be unique.
+
 ### parser: IArgumentParser<T>
+
 The parser defines the type, and can be either:
 
 - A class (constructor) implementing `IArgumentParser<T>`
 - An intance of `IArgumentParser<T>`
 
 A parser instance provides both the parse function and the name property. The name is intended to provide the type for documentation and help output.
+
+### Array arguments
+
+Arguments declared as array will first be split on each comma character. Then, the parser will be applied to each part. You can escape a comma within an
+argument using a backslash.
+
+#### For example:
+
+`--example one,two,three,fo\,ur` will be parsed as `["one","tow","three", "fo,ur"]`
 
 ## Parsing a command line
 
@@ -127,16 +142,16 @@ const optional: string = instance.get("optional", "Some optional default");
 export {myCommand} from "./my-command.ts";
 // Set async handler
 myCommand.onExecute(async function (args) {
-    // this is the command instance
+	// this is the command instance
 
-    // Do something async ;-)
-    return Promise.resolve(args);
+	// Do something async ;-)
+	return Promise.resolve(args);
 });
 
 // If this module is the main module, parse process args and execute!
 if (require.main === module) {
-    const instance = myCommand.parseProcessArgs();
-    export default instance.execute();
+	const instance = myCommand.parseProcessArgs();
+	export default instance.execute();
 }
 ```
 
