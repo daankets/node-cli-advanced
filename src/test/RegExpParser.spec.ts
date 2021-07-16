@@ -1,6 +1,5 @@
 import "mocha";
 import {assert} from "chai";
-import {Command} from "../main/models";
 import {RegExpParser} from "../main/parsers";
 
 describe("RegExpParser", () => {

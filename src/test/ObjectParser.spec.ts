@@ -1,6 +1,6 @@
 import "mocha";
 import {assert} from "chai";
-import {IntParser, NumberParser, ObjectParser} from "../main/parsers";
+import {ObjectParser} from "../main/parsers";
 
 describe("ObjectParser", () => {
     context("Object strings into object instances", () => {
