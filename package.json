@@ -1,8 +1,8 @@
 {
 	"name": "node-cli-advanced",
-	"version": "1.0.0",
+	"version": "1.1.0",
 	"description": "Advanced NodeJS Command Line Interpreter",
-	"main": "lib/main/models/index.js",
+	"main": "lib/main/index.js",
 	"scripts": {
 		"test": "npx eslint src && npx mocha -r ts-node/register src/test/**/*.spec.?s",
 		"build": "npm run test && npx tsc --build",
