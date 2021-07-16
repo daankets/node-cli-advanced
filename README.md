@@ -7,7 +7,7 @@
 ## Motivation
 
 This is a TypeScript port and improvement from one of my earlier projects, that I decided to make available as a utility, after using it in various other
-projects. This typescript based library (ES2015) allows for setting up command line interfaces in a declarative way. It hope it will save you a lot of time.
+projects. This typescript based library (ES2015) allows for setting up command line interfaces in a declarative way. I hope it will save you a lot of time.
 
 > **Disclaimer**
 >
