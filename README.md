@@ -21,18 +21,45 @@ projects. This typescript based library (ES2015) allows for setting up command l
 - Add parsers for built-in and custom argument types
 	- String
 		- Pattern (RegExp based)
+		  > **Example**
+		  >
+		  > --examplePattern BE1234567890
 		- RegExp (an expression)
+		  > **Example**
+		  >
+		  > --exampleWithoutFlags ^yes|no$ --exampleWithFlags "/^yes|no$/i"
 		- Path (ParsedPath)
+		  > **Example**
+		  >
+		  > --examplePath /some/path/to/a/file/or/dir
 	- Boolean
+	  > **Example**
+	  >
+	  > --example yes (true)
+	  > --example false (fals)
+	  > --example (flag)
 	- Number
+	  > **Example**
+	  >
+	  > --exampleFloat 1234.5678 --exampleInt 1234
 		- Integer (Number)
-	- Date
-	- Moment
+		  > **Example**
+		  >
+		  > --example 1234
+	- Date (understands literal now)
+	  > **Example**
+	  >
+	  > --when 2021-01-01
+	- Moment (understands literals now, today, tomorrow, yesterday)
+	  > **Example**
+	  >
+	  > --from 2021-01-01T00:00:00.000+0100 --to today
 	- Enum
 		- String
 		- Numerical
 	- ... whatever you implement a parser for
-- Declare single vs array arguments
+
+- Declare single vs array arguments (comma separated)
 - Performs validation if required
 - Conditionally required arguments (based on value or absence of other arguments for example)
 - Named arguments (`--say Hello`)
@@ -45,8 +72,8 @@ projects. This typescript based library (ES2015) allows for setting up command l
 	- Parse a string array ()
 	- Parse process argv
 - Execute after parsing
-- Provide help text and usage
-- Use a custom logger
+- Provide help text and usage (by default on `--help or -?`)
+- Use a custom logger (defaults to console)
 - Strict mode (disallow undeclared arguments)
 
 ## Usage
