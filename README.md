@@ -1,5 +1,6 @@
 [![Node.js CI](https://github.com/daankets/node-cli-advanced/actions/workflows/build.yml/badge.svg)](https://github.com/daankets/node-cli-advanced/actions/workflows/build.yml)
 [![CodeQL](https://github.com/daankets/node-cli-advanced/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/daankets/node-cli-advanced/actions/workflows/codeql-analysis.yml)
+
 # _Advanced\*_ NodeJS Command Line Interpreter
 
 * See the [Release History](./HISTORY.md)
@@ -75,6 +76,7 @@ projects. This typescript based library (ES2015) allows for setting up command l
 - Provide help text and usage (by default on `--help or -?`)
 - Use a custom logger (defaults to console)
 - Strict mode (disallow undeclared arguments)
+- Loading command arguments from an object or file (json, yaml...)
 
 ## Usage
 
@@ -182,6 +184,30 @@ myCommand.onExecute(async function (args) {
 // If this module is the main module, parse process args and execute!
 if (require.main === module) {
 	const instance = myCommand.parseProcessArgs();
+	export default instance.execute();
+}
+```
+
+## Loading argumens from a file
+
+```typescript
+export {myCommand} from "./my-command.ts";
+// Set async handler
+myCommand.onExecute(async function (args) {
+// this is the command instance
+
+	// Do something async ;-)
+	return Promise.resolve(args);
+});
+
+// If this module is the main module, parse process args and execute!
+if (require.main === module) {
+	/**
+	 * The second argument is a parser that parsed from string to object, the encoding is optional and defaults to utf-8
+	 * The sectionName option indicates under what key in the object to find the config arguments.
+	 */
+	const instance = myCommand.loadFromFile("/some/file.json", (data) => JSON.parse(data), {encoding: "utf-8", sectionName: "test"});
+	// Note that loadFromObject() is available too, and works in a similar way (skips the parser).
 	export default instance.execute();
 }
 ```

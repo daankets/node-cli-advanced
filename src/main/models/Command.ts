@@ -3,6 +3,7 @@ import {IArgumentParser} from "./IArgumentParser";
 import {BooleanParser} from "../parsers";
 import {IArgument} from "./IArgument";
 import {ICommandOptions} from "./ICommandOptions";
+import {readFile} from "fs/promises";
 
 /**
  * This 80-spaces are used as a fast means for padding strings.
@@ -420,6 +421,37 @@ export class Command<R> {
 	 */
 	parseProcessArgs(ignoreStrict = false, noThrow = false): CommandInstance<R> {
 		return this.parseArray(ignoreStrict, process.argv.slice(2), noThrow);
+	}
+
+	/**
+	 * Load the configuration from an object, which could be read from any config file.
+	 * @param data The config object to read from
+	 * @param options The options: The first key on the config to read from (group)
+	 */
+	// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+	loadFromObject(data: any, options?: { sectionName?: string }): CommandInstance<R> {
+		const section = data[options?.sectionName || this.name];
+		const args = [];
+		for (const key in section) {
+			const value = section[key];
+			args.push(`--${key}`);
+			if (value !== null && value !== undefined) {
+				args.push(`${section[key]}`);
+			}
+		}
+		return this.parseArray(false, args);
+	}
+
+	/**
+	 * Load the arguments from a file, reading it, converting it to string using the specified encoding, and then parsing it using the provided parser.
+	 * @param path The path to the file to load
+	 * @param parser Ther parser to conver the string into an object
+	 * @param options The encoding nd sectionName.
+	 */
+	// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+	async loadFromFile(path: string, parser: (data: string) => any, options?: { encoding?: BufferEncoding, sectionName?: string }): Promise<CommandInstance<R>> {
+		const data = parser(await readFile(path, {encoding: options?.encoding || "utf-8"}));
+		return this.loadFromObject(data, options);
 	}
 
 	/**

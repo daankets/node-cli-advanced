@@ -1,7 +1,8 @@
 # Release History
 
 # 1.2.0
-
+- Ability to load arguments from a yaml or JSON config file
+-
 # 1.1.0
 
 - Documentation update
